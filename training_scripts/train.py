@@ -75,4 +75,4 @@ for epoch in range(10):
     print(f"Validation accuracy after epoch {epoch + 1}: {accuracy:.2f}%")
 
 # 모델 저장
-torch.save(model.state_dict(), 'models/gender_classification_model.pth')
+torch.save(model.state_dict(), '../models/gender_classification_model.pth')
