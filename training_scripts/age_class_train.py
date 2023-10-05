@@ -10,9 +10,9 @@ from torch.optim.lr_scheduler import StepLR
 
 
 # 하이퍼파라미터 설정
-batch_size = 8
+batch_size = 2
 learning_rate = 0.001
-epochs = 2
+epochs = 1
 num_classes = 7
 
 # 데이터셋 및 데이터 로더 초기화
@@ -53,42 +53,35 @@ print(f"Using device: {device}")
 # criterion = nn.CrossEntropyLoss()
 ##################
 
-### 개조 resnet_50 (차후 교체시 아래 부분을 수정해서 사용하기)
+### 개조 resnet_50
 model = models.resnet50(pretrained=True)
 num_ftrs = model.fc.in_features
 
 # 분류기 추가
 classifier = nn.Sequential(
-    nn.Linear(num_ftrs, 32),
-    nn.BatchNorm1d(32),
+    nn.Linear(num_ftrs, 256),
+    nn.BatchNorm1d(256),
     nn.ReLU(),
-    nn.AvgPool2d(2, 2),
+    nn.Dropout(0.5),  # Dropout layer 추가
 
-    nn.Linear(32, 32),
-    nn.BatchNorm1d(32),
+    nn.Linear(256, 128),
+    nn.BatchNorm1d(128),
     nn.ReLU(),
-    nn.AvgPool2d(2, 2),
+    nn.Dropout(0.4),  # Dropout layer 추가
 
-    nn.Linear(32, 32),
-    nn.BatchNorm1d(32),
+    nn.Linear(128, 64),
+    nn.BatchNorm1d(64),
     nn.ReLU(),
-    nn.AvgPool2d(2, 2),
+    nn.Dropout(0.3),  # Dropout layer 추가
 
-    nn.Linear(32, 32),
-    nn.BatchNorm1d(32),
-    nn.ReLU(),
-
-    # nn.Dropout(0.2),
-    nn.Linear(32, 7),
-    nn.Softmax(dim=1)
+    nn.Linear(64, 7),
+    nn.Softmax(dim=1)  # Softmax activation 추가
 )
 
 model.fc = classifier
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = model.to(device)
-#### 작성끝 ###
-
 
 # 손실 함수 및 최적화 알고리즘 설정
 criterion = nn.CrossEntropyLoss()
@@ -163,7 +156,7 @@ for epoch in range(epochs):
 
     if val_acc > best_val_acc:
         best_val_acc = val_acc
-        torch.save(model.state_dict(), '../models/best_age_classification_model.pth')
+        torch.save(model.state_dict(), '../models/kp_50_best_age_classification_model.pth')
 
 # Plotting results
 plt.figure()
