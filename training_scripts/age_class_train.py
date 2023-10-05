@@ -5,13 +5,15 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from torchvision import transforms, models
-from custom_dataset import AgeCustomDataset  # 데이터 로더를 직접 작성해야 함
+from custom_dataset import AgeCustomDataset  # Assume you have this implemented
+from torch.optim.lr_scheduler import StepLR
+
 
 # 하이퍼파라미터 설정
-batch_size = 32
+batch_size = 8
 learning_rate = 0.001
-epochs = 10
-num_classes = 83
+epochs = 2
+num_classes = 7
 
 # 데이터셋 및 데이터 로더 초기화
 transform = transforms.Compose([
@@ -19,28 +21,35 @@ transform = transforms.Compose([
     transforms.ToTensor(),
 ])
 
+
 img_dir = 'D:/face_image_data/train/image'
 json_dir = 'D:/face_image_data/train/label'
-dataset = AgeCustomDataset(img_dir=img_dir, json_dir=json_dir, transform=transform)
-train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+train_dataset = AgeCustomDataset(img_dir=img_dir, json_dir=json_dir, transform=transform)  # Fill in details
+train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
-# 검증 데이터셋 및 데이터 로더 초기화
 val_img_dir = 'D:/face_image_data/valid/image'
 val_json_dir = 'D:/face_image_data/valid/label'
-val_dataset = AgeCustomDataset(img_dir=val_img_dir, json_dir=val_json_dir, transform=transform)
+val_dataset = AgeCustomDataset(img_dir=val_img_dir, json_dir=val_json_dir, transform=transform)  # Fill in details
 val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+
+# Progress bars
+train_pbar = tqdm(total=len(train_loader), desc="Training  ", position=0, leave=True)
+val_pbar = tqdm(total=len(val_loader), desc="Validation", position=1, leave=True)
 
 # GPU 설정
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"Using device: {device}")
 
 # 모델 생성 및 옵티마이저, 손실 함수 설정
-model = models.resnet50(pretrained=True) # 101, 152
+# model = models.resnet50(pretrained=True)
+model = models.resnet50(pretrained=False)
 num_ftrs = model.fc.in_features
 model.fc = nn.Linear(num_ftrs, num_classes)
 model = model.to(device)
 
+# Optimizer and Loss
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+scheduler = StepLR(optimizer, step_size=10, gamma=0.7)  # Learning Rate Scheduler
 criterion = nn.CrossEntropyLoss()
 
 # 학습 및 검증 정확도 및 손실 저장을 위한 리스트
@@ -53,11 +62,12 @@ val_losses = []
 best_val_acc = 0.0
 
 # 모델 학습 및 검증
-for epoch in tqdm(range(epochs)):
+for epoch in range(epochs):
     model.train()
     correct_train = 0
     total_train = 0
     loss_train = 0
+    train_pbar.reset()
     for i, (inputs, labels) in enumerate(train_loader):
         inputs, labels = inputs.to(device), labels.to(device)
         outputs = model(inputs)
@@ -72,19 +82,22 @@ for epoch in tqdm(range(epochs)):
         total_train += labels.size(0)
         correct_train += (predicted == labels).sum().item()
 
-        if (i + 1) % 10 == 0:  # Print every 10th batch
-            tqdm.write(f"Epoch [{epoch + 1}/{epochs}], Step [{i + 1}/{len(train_loader)}], Loss: {loss.item():.4f}")
+        train_pbar.set_postfix({'Training Loss': loss.item()})
+        train_pbar.update(1)
+
+    scheduler.step()
 
     train_acc = 100 * correct_train / total_train
-    train_accs.append(train_acc)
     train_losses.append(loss_train / len(train_loader))
-    print(f'Epoch {epoch+1}/{epochs}, Train Accuracy: {train_acc:.2f}%, Train Loss: {loss_train / len(train_loader):.4f}')
-
+    train_accs.append(train_acc)
+    train_pbar.write(
+        f'Epoch {epoch + 1}/{epochs}, Train Accuracy: {train_acc:.2f}%, Train Loss: {loss_train / len(train_loader):.4f}')
 
     model.eval()
     val_loss = 0.0
     correct_val = 0
     total_val = 0
+    val_pbar.reset()
     with torch.no_grad():
         for i, (inputs, labels) in enumerate(val_loader):
             inputs, labels = inputs.to(device), labels.to(device)
@@ -96,21 +109,20 @@ for epoch in tqdm(range(epochs)):
             total_val += labels.size(0)
             correct_val += (predicted == labels).sum().item()
 
-            if (i + 1) % 10 == 0:  # Print every 10th batch
-                tqdm.write(f"Validation Epoch [{epoch + 1}/{epochs}], Step [{i + 1}/{len(val_loader)}], Loss: {loss.item():.4f}")
+            val_pbar.set_postfix({'Validation Loss': loss.item()})
+            val_pbar.update(1)
 
     val_acc = 100 * correct_val / total_val
     val_losses.append(val_loss / len(val_loader))
     val_accs.append(val_acc)
-
-    print(f'Epoch {epoch+1}/{epochs}, Validation Accuracy: {val_acc:.2f}%, Validation Loss: {val_loss / len(val_loader):.4f}')
-
+    val_pbar.write(
+        f'Epoch {epoch + 1}/{epochs}, Validation Accuracy: {val_acc:.2f}%, Validation Loss: {val_loss / len(val_loader):.4f}')
 
     if val_acc > best_val_acc:
         best_val_acc = val_acc
         torch.save(model.state_dict(), '../models/best_age_classification_model.pth')
 
-# Plotting accuracy and loss
+# Plotting results
 plt.figure()
 plt.plot(train_accs, label='Train Accuracy')
 plt.plot(val_accs, label='Validation Accuracy')
