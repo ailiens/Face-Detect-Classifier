@@ -5,12 +5,12 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from torchvision import transforms, models
-from custom_dataset import CustomDataset  # 데이터 로더를 직접 작성해야 함
+from custom_dataset import AgeCustomDataset  # 데이터 로더를 직접 작성해야 함
 
 # 하이퍼파라미터 설정
 batch_size = 32
 learning_rate = 0.001
-epochs = 10 ## 테스트할때 에폭 줄여서 해보고 결정
+epochs = 10
 num_classes = 83
 
 # 데이터셋 및 데이터 로더 초기화
@@ -21,13 +21,13 @@ transform = transforms.Compose([
 
 img_dir = 'D:/face_image_data/train/image'
 json_dir = 'D:/face_image_data/train/label'
-dataset = CustomDataset(img_dir=img_dir, json_dir=json_dir, transform=transform)
+dataset = AgeCustomDataset(img_dir=img_dir, json_dir=json_dir, transform=transform)
 train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
 # 검증 데이터셋 및 데이터 로더 초기화
 val_img_dir = 'D:/face_image_data/valid/image'
 val_json_dir = 'D:/face_image_data/valid/label'
-val_dataset = CustomDataset(img_dir=val_img_dir, json_dir=val_json_dir, transform=transform)
+val_dataset = AgeCustomDataset(img_dir=val_img_dir, json_dir=val_json_dir, transform=transform)
 val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
 # GPU 설정
@@ -35,9 +35,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"Using device: {device}")
 
 # 모델 생성 및 옵티마이저, 손실 함수 설정
-# model = models.resnet50(pretrained=True) #<-하는중
-model = models.resnet101(pretrained=True) # 해봐야됨
-# model = models.resnet152(pretrained=True) # 해봐야됨
+model = models.resnet50(pretrained=True) # 101, 152
 num_ftrs = model.fc.in_features
 model.fc = nn.Linear(num_ftrs, num_classes)
 model = model.to(device)
@@ -80,6 +78,8 @@ for epoch in tqdm(range(epochs)):
     train_acc = 100 * correct_train / total_train
     train_accs.append(train_acc)
     train_losses.append(loss_train / len(train_loader))
+    print(f'Epoch {epoch+1}/{epochs}, Train Accuracy: {train_acc:.2f}%, Train Loss: {loss_train / len(train_loader):.4f}')
+
 
     model.eval()
     val_loss = 0.0
@@ -103,10 +103,12 @@ for epoch in tqdm(range(epochs)):
     val_losses.append(val_loss / len(val_loader))
     val_accs.append(val_acc)
 
+    print(f'Epoch {epoch+1}/{epochs}, Validation Accuracy: {val_acc:.2f}%, Validation Loss: {val_loss / len(val_loader):.4f}')
+
+
     if val_acc > best_val_acc:
         best_val_acc = val_acc
-        # 나는 까먹었지만 모델 저장시 앞에 모델 넘버 붙이기 ex) 50best_age_classification_model.pth
-        torch.save(model.state_dict(), 'models/best_age_classification_model.pth')
+        torch.save(model.state_dict(), '../models/best_age_classification_model.pth')
 
 # Plotting accuracy and loss
 plt.figure()
