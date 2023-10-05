@@ -41,16 +41,59 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"Using device: {device}")
 
 # 모델 생성 및 옵티마이저, 손실 함수 설정
+# model = models.resnet50(pretrained=False)
 # model = models.resnet50(pretrained=True)
-model = models.resnet50(pretrained=False)
-num_ftrs = model.fc.in_features
-model.fc = nn.Linear(num_ftrs, num_classes)
-model = model.to(device)
+# num_ftrs = model.fc.in_features
+# model.fc = nn.Linear(num_ftrs, num_classes)
+# model = model.to(device)
+#
+# # Optimizer and Loss
+# optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+# scheduler = StepLR(optimizer, step_size=10, gamma=0.7)  # Learning Rate Scheduler
+# criterion = nn.CrossEntropyLoss()
+##################
 
-# Optimizer and Loss
-optimizer = optim.Adam(model.parameters(), lr=learning_rate)
-scheduler = StepLR(optimizer, step_size=10, gamma=0.7)  # Learning Rate Scheduler
+### 개조 resnet_50 (차후 교체시 아래 부분을 수정해서 사용하기)
+model = models.resnet50(pretrained=True)
+num_ftrs = model.fc.in_features
+
+# 분류기 추가
+classifier = nn.Sequential(
+    nn.Linear(num_ftrs, 32),
+    nn.BatchNorm1d(32),
+    nn.ReLU(),
+    nn.AvgPool2d(2, 2),
+
+    nn.Linear(32, 32),
+    nn.BatchNorm1d(32),
+    nn.ReLU(),
+    nn.AvgPool2d(2, 2),
+
+    nn.Linear(32, 32),
+    nn.BatchNorm1d(32),
+    nn.ReLU(),
+    nn.AvgPool2d(2, 2),
+
+    nn.Linear(32, 32),
+    nn.BatchNorm1d(32),
+    nn.ReLU(),
+
+    # nn.Dropout(0.2),
+    nn.Linear(32, 7),
+    nn.Softmax(dim=1)
+)
+
+model.fc = classifier
+
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+model = model.to(device)
+#### 작성끝 ###
+
+
+# 손실 함수 및 최적화 알고리즘 설정
 criterion = nn.CrossEntropyLoss()
+optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+scheduler = StepLR(optimizer, step_size=7, gamma=0.1)
 
 # 학습 및 검증 정확도 및 손실 저장을 위한 리스트
 train_accs = []
