@@ -1,4 +1,3 @@
-from tqdm import tqdm
 import matplotlib.pyplot as plt
 import torch
 import torch.nn as nn
@@ -6,7 +5,9 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from torchvision import transforms, models
 from custom_dataset import AgeCustomDataset  # Assume you have this implemented
-from torch.optim.lr_scheduler import StepLR
+import time
+
+
 class Backbone(nn.Module):
     def __init__(self):
         super(Backbone,self).__init__()
@@ -41,6 +42,14 @@ class Backbone(nn.Module):
         # print("Shape of cat_scale:", cat_scale.shape)  # Add this line
         feat = self.f1(cat_scale)
         pred = self.f2(feat)
+        if torch.isnan(scale).any():
+            print('NAN in scale')
+        if torch.isnan(cat_scale).any():
+            print('NAN in cat_scale')
+        if torch.isnan(feat).any():
+            print('NAN in feat')
+        if torch.isnan(pred).any():
+            print('NAN in pred')
         return feat, pred
 
 
@@ -49,11 +58,12 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"Using device: {device}")
 # 모델, 옵티마이저, 손실 함수 초기화
 model = Backbone().to(device)
-optimizer = optim.SGD(model.parameters(), lr=0.01)
+optimizer = optim.SGD(model.parameters(), lr=0.001)
+scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=30, gamma=0.1)  # 30 에폭마다 학습률에 0.1을 곱함
 criterion = nn.MSELoss()
 
 # # 하이퍼파라미터 설정
-batch_size = 32
+batch_size = 16
 learning_rate = 0.001
 epochs = 10
 num_classes = 7
@@ -85,6 +95,7 @@ val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 train_losses = []
 val_losses = []
 
+#####
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -95,9 +106,12 @@ for epoch in range(epochs):
     running_train_loss = 0.0
     batch_count = 0
 
-    for i, (inputs, labels) in enumerate(train_loader):
-        inputs, labels = inputs.to(device), labels.to(device).float()
+    start_time_epoch = time.time()
 
+    for i, (inputs, labels) in enumerate(train_loader):
+        start_time_batch = time.time()
+
+        inputs, labels = inputs.to(device), labels.to(device).float()
         optimizer.zero_grad()
         _, outputs = model(inputs)
         loss = criterion(outputs.squeeze(), labels)
@@ -107,13 +121,20 @@ for epoch in range(epochs):
         running_train_loss += loss.item()
         batch_count += 1
 
-        if i % 100 == 0:
-            logging.info(f"Epoch [{epoch+1}/{epochs}], Batch [{i+1}/{len(train_loader)}], Train Loss: {loss.item()}")
+        if (i + 1) % 100 == 0:
+            end_time_batch = time.time()
+            batch_time = end_time_batch - start_time_batch
+            logging.info(
+                f"Epoch [{epoch + 1}/{epochs}], Batch [{i + 1}/{len(train_loader)}], Train Loss: {loss.item():.4f}, Time: {batch_time:.2f}s")
 
-    # Calculate and store average training loss
+    scheduler.step()
+
+    end_time_epoch = time.time()
+    epoch_time = end_time_epoch - start_time_epoch
     avg_train_loss = running_train_loss / batch_count
     train_losses.append(avg_train_loss)
-    logging.info(f"Epoch [{epoch+1}/{epochs}], Average Train Loss: {avg_train_loss}")
+    logging.info(
+        f"Epoch [{epoch + 1}/{epochs}], Average Train Loss: {avg_train_loss}, Time per epoch: {epoch_time:.2f}s")
 
     # Validation loop
     model.eval()
@@ -124,8 +145,9 @@ for epoch in range(epochs):
 
     with torch.no_grad():
         for i, (inputs, labels) in enumerate(val_loader):
-            inputs, labels = inputs.to(device), labels.to(device).float()
+            start_time_batch = time.time()  # Start time for batch
 
+            inputs, labels = inputs.to(device), labels.to(device).float()
             _, outputs = model(inputs)
             loss = criterion(outputs.squeeze(), labels)
             running_val_loss += loss.item()
@@ -135,17 +157,18 @@ for epoch in range(epochs):
             correct += (predicted == labels).sum().item()
             batch_count += 1
 
-            if i % 10 == 0:  # Print loss every 10 mini-batches
-                print(f"Epoch [{epoch+1}/{epochs}], Batch [{i+1}/{len(val_loader)}], Val Loss: {loss.item()}")
+            if (i + 1) % 100 == 0:  # Log every 100 batches
+                end_time_batch = time.time()
+                batch_time = end_time_batch - start_time_batch
+                logging.info(
+                    f"Validation - Epoch [{epoch + 1}/{epochs}], Batch [{i + 1}/{len(val_loader)}], Val Loss: {loss.item():.4f}, Time: {batch_time:.2f}s")
 
-    # Calculate and store average validation loss
     avg_val_loss = running_val_loss / batch_count
     val_losses.append(avg_val_loss)
 
     val_acc = 100 * correct / total
-    print(f'Epoch [{epoch + 1}/10], Average Val Loss: {avg_val_loss}, Val Acc: {val_acc}')
+    logging.info(f'Epoch [{epoch + 1}/10], Average Val Loss: {avg_val_loss}, Val Acc: {val_acc}')
 
-    # Save the best model
     if avg_val_loss < best_val_loss:
         best_val_loss = avg_val_loss
         torch.save(model.state_dict(), model_save_path)
@@ -158,9 +181,6 @@ plt.xlabel('Epoch')
 plt.ylabel('Loss')
 plt.legend()
 plt.savefig('../test/plot_image/loss_curves.png')
-
-
-
 
 #####
 
