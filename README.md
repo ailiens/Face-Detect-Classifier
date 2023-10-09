@@ -48,7 +48,7 @@
 
 ### 🛠️ 기술 스택
 
-- ![Python](https://example.com/python-icon.png) Python
+- <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=Python&logoColor=white">
 - ![TensorFlow](https://example.com/tensorflow-icon.png) TensorFlow
 - ![PyTorch](https://example.com/pytorch-icon.png) PyTorch
 - ![GitHub](https://example.com/github-icon.png) GitHub
