@@ -1,4 +1,4 @@
-![header](https://capsule-render.vercel.app/api?& type=waving&color=auto&height=300&session=header&text=FDC(Face&nbsp;Detect&nbsp;&&nbsp;Classifier))
+![header](https://capsule-render.vercel.app/api?& type=waving&height=300&text=FDC(Face&nbsp;Detect&nbsp;&&nbsp;Classifier))
 # 🎭 FDC (Face Detect & Classifier) 🎭
 
 ## 🌟 프로젝트 개요
