@@ -1,4 +1,4 @@
-![header](https://capsule-render.vercel.app/api?&type=waving&text=FDC(Face&nbsp;Detect&nbsp;&&nbsp;Classifier))
+![header](https://capsule-render.vercel.app/api?&type=waving&text=TJE_3rd_project-2)
 # 🎭 FDC (Face Detect & Classifier) 🎭
 
 ## 🌟 프로젝트 개요
