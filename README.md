@@ -49,11 +49,10 @@
 ### 🛠️ 기술 스택
 
 - <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=Python&logoColor=white">
-- <img src="https://img.shields.io/badge/표시할이름-색상?style=for-the-badge&logo=Django&logoColor=white">
-
-- ![PyTorch](https://example.com/pytorch-icon.png) PyTorch
-- ![GitHub](https://example.com/github-icon.png) GitHub
-- ![Jupyter](https://example.com/jupyter-icon.png) Jupyter
+- <img src="https://img.shields.io/badge/Django?style=for-the-badge&logo=Django&logoColor=white">
+- <img src="https://img.shields.io/badge/Pytorch?style=for-the-badge&logo=Pytorch&logoColor=white">
+- <img src="https://img.shields.io/badge/GitHub?style=for-the-badge&logo=GitHub&logoColor=white">
+- <img src="https://img.shields.io/badge/Jupyter?style=for-the-badge&logo=Jupyter&logoColor=white">
 
 ### 📄 사용 모델
 
