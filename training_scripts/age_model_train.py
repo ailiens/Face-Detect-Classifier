@@ -13,29 +13,30 @@ from custom_dataset2 import FaceAgeDataset
 from torch.utils.data import DataLoader
 
 
+
 # print("PyTorch Version: ", torch.__version__)
 # print("Torchvision Version: ", torchvision.__version__)
 
-# data_dir = "D:/face_image_data"
+face_train_image = 'D:/Ddrive/3rd/data_re/training/images'
+face_train_json = 'D:/Ddrive/3rd/data_re/training/labels'
 
-face_train_image = 'D:/face_image_data/train/re_image/'
-face_train_json = 'D:/face_image_data/train/label/'
+face_valid_image = 'D:/Ddrive/3rd/data_re/validation/images'
+face_valid_json = 'D:/Ddrive/3rd/data_re/validation/labels'
 
-face_valid_image = 'D:/face_image_data/valid/re_image/'
-face_valid_json = 'D:/face_image_data/valid/label/'
-
-# Models to choose from [resnet, alexnet, vgg, squeezenet, densenet, inception, squeezenet]
+# Models to choose from [resnet, alexnet, vgg, squeezenet, densenet, inception]
 model_name = "resnet"
 # Number of classes in the dataset
 num_classes = 7
 # Batch size for training (change depending on how much memory you have)
-batch_size = 64
+batch_size = 32
 # Number of epochs to train for
-num_epochs = 20
+num_epochs = 10
 num_workers = 0
 # Flag for feature extracting. When False, we finetune the whole model,
 #   when True we only update the reshaped layer params
 feature_extract = True
+
+
 
 def train_model(model, dataloaders, criterion, optimizer, num_epochs=num_epochs, is_inception=False):
     since = time.time()
@@ -169,7 +170,7 @@ def initialize_model(model_name, num_classes, feature_extract, use_pretrained=Tr
         input_size = 224
 
     elif model_name == "inception":
-        """ Inception v3 
+        """ Inception v3
         Be careful, expects (299,299) sized images and has auxiliary output
         """
         model_ft = models.inception_v3(pretrained=use_pretrained)
@@ -229,7 +230,8 @@ val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shu
 # Create training and validation datasets
 # image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x), data_transforms[x]) for x in ['train', 'val']}
 # image_datasets = datasets.ImageFolder(os.path.join())
-####3
+####
+
 # Create training and validation dataloaders
 dataloaders_dict = {'train': train_loader, 'val': val_loader}
 #####
@@ -267,7 +269,7 @@ criterion = nn.CrossEntropyLoss()
 model_ft, hist = train_model(model_ft, dataloaders_dict, criterion, optimizer_ft, num_epochs=num_epochs,
                              is_inception=(model_name == "inception"))
 
-torch.save(model_ft.state_dict(), '../models/1010kp_50_newmodel.pth')
+torch.save(model_ft.state_dict(), '../models/1010'+'{}2.pth'.format(model_name))
 
 
 # Initialize the non-pretrained version of the model used for this run
