@@ -23,17 +23,27 @@ def detect_face(image_path):
             y = shape.part(i).y
             cv2.circle(img, (x, y), 2, (0, 255, 0), -1)
         face_img = cv2.resize(img[y1:y2, x1:x2], (224, 224))
-    return face_img
+    return img, face_img
 
 # 이미지 전처리
 transform = transforms.Compose([transforms.ToTensor()])
 
 # 단일 이미지 불러오기
-image_path = './image/image.jpg'  # 실제 이미지 경로로 변경해주세요.
-face_image = detect_face(image_path)
+image_path = './image/jang.jpg'  # 실제 이미지 경로로 변경해주세요.
+landmarked_image, face_image = detect_face(image_path)
+# face_image = detect_face(image_path)
 face_image_pil = Image.fromarray(cv2.cvtColor(face_image, cv2.COLOR_BGR2RGB))
 
-# 이미지 표시
+######## 1011 수정
+# 랜드마크가 찍힌 원본 이미지 표시
+plt.figure()
+plt.imshow(cv2.cvtColor(landmarked_image, cv2.COLOR_BGR2RGB))
+plt.axis('off')
+plt.title('Landmarked Image')
+plt.show()
+
+# 잘라낸 얼굴 이미지 표시
+plt.figure()
 plt.imshow(cv2.cvtColor(face_image, cv2.COLOR_BGR2RGB))
 plt.axis('off')
 plt.title('Cropped Face')
