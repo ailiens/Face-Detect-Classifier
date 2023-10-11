@@ -29,7 +29,7 @@ def detect_face(image_path):
 transform = transforms.Compose([transforms.ToTensor()])
 
 # 단일 이미지 불러오기
-image_path = './image/test6.jpg'  # 실제 이미지 경로로 변경해주세요.
+image_path = './image/image.jpg'  # 실제 이미지 경로로 변경해주세요.
 face_image = detect_face(image_path)
 face_image_pil = Image.fromarray(cv2.cvtColor(face_image, cv2.COLOR_BGR2RGB))
 
@@ -45,10 +45,11 @@ input_batch = input_image.unsqueeze(0)
 
 # GPU 설정 및 모델 불러오기
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-age_model = models.resnet34()
-N = 10  # 나이 범위의 수, 실제 모델에 맞게 변경해야 함
+age_model = models.resnet50()
+N = 7  # 나이 범위의 수, 실제 모델에 맞게 변경해야 함
 age_model.fc = nn.Linear(age_model.fc.in_features, N)
-age_model.load_state_dict(torch.load('../models/best_age_classification_model.pth'))  # 모델 가중치 경로
+# age_model.load_state_dict(torch.load('../models/7class_1010resnet.pth'))  # 모델 가중치 경로
+age_model.load_state_dict(torch.load('../models/7class_1010resnet2.pth'))  # 모델 가중치 경로
 age_model = age_model.to(device)
 age_model.eval()
 

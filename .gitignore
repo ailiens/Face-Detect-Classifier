@@ -1,3 +1,4 @@
+*.dat
 *.pth
 *.xml
 *.idea

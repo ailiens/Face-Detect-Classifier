@@ -27,7 +27,7 @@ model.fc = nn.Linear(model.fc.in_features, 2)
 model = model.to(device)
 
 # model.load_state_dict((torch.load('../models/1006_gender_classification_model_re.pth')))
-model.load_state_dict(torch.load('../models/1006_gender_classification_model_re.pth', map_location=device))
+model.load_state_dict(torch.load('../models/7class_1010resnet2.pth', map_location=device))
 model.eval()
 
 # test_image_path = '../test/image/image.jpg'   ### no
@@ -35,7 +35,7 @@ model.eval()
 # test_image_path = '../test/image/sun.jpg'    ### no
 # test_image_path = '../test/image/nana.jpg'    # OK
 # test_image_path = '../test/image/nana2.jpg'   # OK
-test_image_path = '../test/image/goong.jpg'    # OK
+test_image_path = '../test/image/image.jpg'    # OK
 image = Image.open(test_image_path)
 
 image = transform(image).unsqueeze(0)
