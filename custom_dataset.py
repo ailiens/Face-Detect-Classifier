@@ -57,6 +57,39 @@ class CustomDataset(Dataset):
 
         return cropped_image, 0 if gender == 'male' else 1  # 0 for male and 1 for female
 
+# Undersammpling(binary classification training)
+def undersample_DataLoader(img_dir, json_dir, transform, batch_size, shuffle=True):
+    from sklearn.utils import resample
+    from torch.utils.data import DataLoader
+    from torchvision import models, transforms
+
+    # 데이터프레임 생성 (파일명과 레이블)
+    file_list = os.listdir(img_dir)
+    labels = []
+    for img_name in file_list:
+        json_path = os.path.join(json_dir, img_name.replace('.jpg', '.json'))
+        with open(json_path, 'r') as f:
+            json_data = json.load(f)
+            gender = json_data['gender']
+            label = 0 if gender == 'male' else 1
+            labels.append(label)
+
+    data = pd.DataFrame({'Image': file_list, 'Label': labels})
+
+    # 언더샘플링
+    male_samples = data[data['Label'] == 0]
+    female_samples = data[data['Label'] == 1]
+
+    if len(male_samples) >= len(female_samples):
+        undersampled_male = resample(male_samples, replace=False, n_samples=len(female_samples), random_state=42)
+        undersampled_data = pd.concat([undersampled_male, female_samples])
+    else:
+        undersampled_female = resample(female_samples, replace=False, n_samples=len(male_samples), random_state=42)
+        undersampled_data = pd.concat([male_samples, undersampled_female])
+
+    dataset = CustomDataset(img_dir = img_dir, json_dir = json_dir, transform = transform)
+
+    return DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
 ## 7진 분류로 변경
 class AgeCustomDataset(Dataset):
