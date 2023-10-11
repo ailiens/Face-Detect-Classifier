@@ -37,8 +37,10 @@ transform = transforms.Compose([
 ])
 
 # 데이터셋 및 로더 설정
-test_img_dir = 'D:/Ddrive/3rd/data_ex/validation/images'
-test_json_dir = 'D:/Ddrive/3rd/data_ex/validation/labels'
+# test_img_dir = 'D:/Ddrive/3rd/data_ex/validation/images'
+test_img_dir = 'D:/face_image_data/valid/image'
+# test_json_dir = 'D:/Ddrive/3rd/data_ex/validation/labels'
+test_json_dir = 'D:/face_image_data/valid/label'
 test_dataset = CustomDataset(img_dir=test_img_dir, json_dir=test_json_dir, transform=transform)
 test_loader = DataLoader(test_dataset, batch_size = 8, shuffle=False)
 
@@ -47,12 +49,13 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f'Using device: {device}')
 
 # 사전학습모델
-model = models.resnet50(pretrained=True)
+# model = models.resnet50(pretrained=True)
+model = models.resnet34(pretrained=True)
 model.fc = nn.Linear(model.fc.in_features, 2)
 model = model.to(device)
 
 # 파라미터 불러오기
-model.load_state_dict(torch.load('../models/1010_gender_classification_model_re_under.pth'))
+model.load_state_dict(torch.load('../models/gender_classification_model.pth'))
 model.eval()
 
 total = 0
