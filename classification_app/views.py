@@ -53,7 +53,7 @@ def load_age_model(model_path, model_type):
 # gender_model = load_gender_model(MODEL_PATH + 'Final_1010_gender_classification_model_re_under.pth', models.resnet50, 2)
 gender_model = load_gender_model(MODEL_PATH + 'gender_classification_model.pth', models.resnet34, 2)
 
-age_model = load_age_model(MODEL_PATH + '1011_7class_resnet101.pth', 'resnet101')
+age_model = load_age_model(MODEL_PATH + '1012_7class_resnet101.pth', 'resnet101')
 
 
 def cv2_to_base64(image):

@@ -9,7 +9,7 @@ from torchvision import datasets, models, transforms
 import matplotlib.pyplot as plt
 import time
 import copy
-from custom_dataset2 import FaceAgeDataset
+from custom_dataset import FaceAgeDataset
 from torch.utils.data import DataLoader
 
 
@@ -17,20 +17,27 @@ from torch.utils.data import DataLoader
 # print("PyTorch Version: ", torch.__version__)
 # print("Torchvision Version: ", torchvision.__version__)
 
-face_train_image = 'D:/Ddrive/3rd/data_re/training/images'
-face_train_json = 'D:/Ddrive/3rd/data_re/training/labels'
+# face_train_image = 'D:/Ddrive/3rd/data_re/training/images'
+# face_train_json = 'D:/Ddrive/3rd/data_re/training/labels'
+# KP
+face_train_image = 'D:/face_image_data/train/re_image'
+face_train_json = 'D:/face_image_data/train/label'
 
-face_valid_image = 'D:/Ddrive/3rd/data_re/validation/images'
-face_valid_json = 'D:/Ddrive/3rd/data_re/validation/labels'
+
+# face_valid_image = 'D:/Ddrive/3rd/data_re/validation/images'
+# face_valid_json = 'D:/Ddrive/3rd/data_re/validation/labels'
+# KP
+face_valid_image = 'D:/face_image_data/valid/re_image'
+face_valid_json = 'D:/face_image_data/valid/label'
 
 # Models to choose from [resnet, alexnet, vgg, squeezenet, densenet, inception]
-model_name = "resnet"
+model_name = "vgg"
 # Number of classes in the dataset
 num_classes = 7
 # Batch size for training (change depending on how much memory you have)
-batch_size = 32
+batch_size = 16
 # Number of epochs to train for
-num_epochs = 10
+num_epochs = 2
 num_workers = 0
 # Flag for feature extracting. When False, we finetune the whole model,
 #   when True we only update the reshaped layer params
@@ -145,7 +152,7 @@ def initialize_model(model_name, num_classes, feature_extract, use_pretrained=Tr
     elif model_name == "vgg":
         """ VGG11_bn
         """
-        model_ft = models.vgg11_bn(pretrained=use_pretrained)
+        model_ft = models.vgg16_bn(pretrained=use_pretrained)
         set_parameter_requires_grad(model_ft, feature_extract)
         num_ftrs = model_ft.classifier[6].in_features
         model_ft.classifier[6] = nn.Linear(num_ftrs, num_classes)
