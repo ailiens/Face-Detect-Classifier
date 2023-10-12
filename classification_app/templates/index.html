@@ -30,18 +30,31 @@
         reader.readAsDataURL(file);
       }
     }
+    function checkFile() {
+      var fileInput = document.querySelector('input[type="file"]');
+      if (fileInput.files.length === 0) {
+        alert("파일을 선택해주세요."); // 파일이 선택되지 않았을 때 경고 메시지 표시
+        return false; // 폼 제출 중지
+      }
+      return true; // 파일이 선택되었을 때 폼 제출 계속
+    }
   </script>
 </head>
 <body>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+      <a class="navbar-brand" href="/">🎭 FDC</a>
+    </div>
+  </nav>
   <div class="center-screen">
-    <h1>🎭Gender & Age Classifier🎭</h1><br>
+    <h1 style="font-weight: bold;">🎭Gender & Age Classifier🎭</h1><br>
 
     <!-- 기타 내용 -->
 
     <h2>Upload Image</h2><br><br>
     <img id="preview" style="display:none;" alt="Image preview" height="300"/>
 
-    <form method="post" enctype="multipart/form-data">
+    <form method="post" enctype="multipart/form-data" onsubmit="return checkFile();">
         {% csrf_token %}
         <div class="text-center mb-3"> <!-- Bootstrap의 text-center 클래스로 가운데 정렬 -->
             <input type="file" name="image" onchange="previewImage(this);" />
