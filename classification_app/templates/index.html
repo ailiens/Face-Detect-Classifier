@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -43,18 +44,8 @@
           height: 35px;
           margin:20px auto 0;
         }
-
-        /* 선택된 파일 이름을 나타내는 스타일 */
-        .custom-file-upload::after {
-<!--          content: 'Choose a file';-->
-          margin-left: 10px;
-        }
-<!--        body {-->
-<!--          background: #EDECF2;-->
-<!--        }-->
-
-
-
+        body{
+            background-color: lightgrey; }
     </style>
   <script>
     function previewImage(input) {
@@ -76,23 +67,44 @@
       }
       return true; // 파일이 선택되었을 때 폼 제출 계속
     }
+    function previewImage(input) {
+    var file = input.files[0];
+    if (file) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        // 이미지 업로드 시 jang.jpg 숨기기
+        document.getElementById('initialImage').style.display = 'none';
+        // 미리보기 이미지 표시
+        document.getElementById('preview').src = e.target.result;
+        document.getElementById('preview').style.display = 'block';
+      }
+      reader.readAsDataURL(file);
+    }
+  }
   </script>
 </head>
 <body>
 <!--  <nav class="navbar navbar-expand-lg navbar-light bg-light">-->
-  <nav class="navbar navbar-expand-lg" style="background-color:#D1E8EE ;">
-    <div class="container">
-<!--      <a class="navbar-brand" href="/">FDC</a>-->
-        <a class="navbar-brand" href="/" style="color: black;">FDC</a>
-    </div>
-  </nav>
+<!--  <nav class="navbar navbar-expand-lg" style="background-color: #FFFFFF;">-->
+<!--  <div class="container">-->
+<!--    <a class="navbar-brand" href="/" style="color: #000000; font-weight: bold;">FDC</a>-->
+<!--  </div>-->
+<!--  </nav>-->
+
+  <nav class="navbar navbar-expand-lg" style="background-color: #000000;" >
+  <div class="container">
+    <a class="navbar-brand" href="/" style="color: #FFFFFF; font-weight: bold;">FDC</a>
+  </div>
+ </nav>
+
   <div class="center-screen content-container">
     <h1 style="font-weight: bold;">Gender & Age Classifier</h1><br>
 
     <!-- 기타 내용 -->
-
     <h2>Upload Image</h2><br><br>
-    <img id="preview" style="display:none;" alt="Image preview" height="300"/>
+    <img src="{% static 'jang.jpg' %}" width="20%" height="20%" id="initialImage">
+    <img id="preview" style="display: none;" alt="Image preview" height="300"/>
+
 
     <form method="post" enctype="multipart/form-data" onsubmit="return checkFile();">
         {% csrf_token %}
@@ -101,7 +113,6 @@
             <label for="fileInput" class="custom-file-upload">
              Upload Button
             </label>
-
         </div>
         <div class="text-center"> <!-- Bootstrap의 text-center 클래스로 가운데 정렬 -->
             <button type="submit" class="btn btn-primary">Predict</button>
@@ -113,6 +124,13 @@
     <hr>
     <img src="{{ uploaded_image.url }}" alt="Uploaded image" width="200">
     {% endif %}
+  </div>
+  <div>
+    <img src="{%static 'ma.jpg' %}" width="20%" height="30%" style="position: absolute; top: 100px; left: 0px;">
+    <img src="{%static 'nana.jpg' %}" width="20%" height="30%" style="position: absolute; top: 55px; left: 1200px;">
+    <img src="{%static 'jungi.jpg' %}" width="20%" height="30%" style="position: absolute; top: 500px; left: 1100px;">
+    <img src="{%static 'sun2.jpg' %}" width="20%" height="30%" style="position: absolute; top: 150px; left: 1000px;">
+    <img src="{%static 'jo2.jpg' %}" width="20%" height="30%" style="position: absolute; top: 450px; left: 50px;">
   </div>
 </body>
 </html>
