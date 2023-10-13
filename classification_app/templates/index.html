@@ -4,48 +4,120 @@
 <head>
   <meta charset="UTF-8">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <title>FDC</title>
+  <title>👀 FDC </title>
     <style>
-      /* 기존 스타일 */
-      .center-screen {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        height: 80vh;
-      }
-      .image-container {
-        max-width: 300px;
-        margin: auto;
-      }
-      .content-container {
-        border: 1px solid #ddd;
-        padding: 20px;
-        background-color: white;
-        border-radius: 10px;
-        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
-        width: 80%;
-        height: 70%;
-        text-align: center;
-        margin: 25px auto 0; /* 가로 가운데 정렬을 위한 자동 마진 설정 */
-        }
-      .input[type="file"] {
-         width: 150px; /* 너비 조정 */
-         height: 30px; /* 높이 조정 */
-       }
-      .custom-file-upload {
-          background-color: #007bff; /* 배경색 지정 */
-          color: #fff; /* 텍스트 색상 지정 */
-          padding: 10px 20px; /* 여백 지정 */
-          border-radius: 5px; /* 테두리 둥글게 만들기 */
-          cursor: pointer; /* 포인터 커서로 변경하여 클릭 가능한 버튼처럼 보이게 함 */
-          display: inline-block; /* 인라인 블록 요소로 표시 */
-          width: 150px;
-          height: 35px;
-          margin:20px auto 0;
-        }
-        body{
-            background-color: lightgrey; }
+    /* 전체 페이지 컨테이너 */
+    body {
+      background-color: #F2F2F2; /* 흰색 */
+      overflow: hidden;
+    }
+    .page-container {
+      position: fixed;
+      top: 80px;
+      bottom: 80px;
+      left: 100px;
+      right: 100px;
+      width: calc(100%-200px);
+      height: calc(100%-200px);
+      box-shadow: 0px 0px 10px 0px #000; /* 그림자 추가 */
+      background-color: white;
+      overflow: hidden;
+    }
+    /* 기존 스타일 */
+    .center-screen {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 80vh;
+    overflow: hidden;
+    }
+    .image {
+      position: fixed;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin: 0 auto; /* 가운데 정렬 */
+    }
+    /* Predict Button */
+    .text-center button {
+      display: inline-block;
+      background-color: #666699;
+      font-weight: bold;
+      font-size: 28px;
+      color: #FFFFFF;
+      cursor: pointer;
+      border: 1px solid #FFFFFF;
+     }
+     .text-center button:hover {
+      background-color: #9999CC;
+      border: 1px solid #FFFFFF;
+      font-weight: bold;
+      font-size: 28px;
+      color: #FFFFFF;
+     }
+     .text-center button:active {
+      background-color: #9999CC;
+      border: 1px solid #FFFFFF;
+      font-weight: bold;
+      font-size: 28px;
+      color: #FFFFFF;
+     }
+
+     /* Upload Photo*/
+    .filebox label {
+      display: inline-block;
+      padding: .5em .75em;
+      color: 2px solid #5d5b5b;
+      font-weight: bold;
+      font-size: 24px;
+      line-height: normal;
+      vertical-align: middle;
+      background-color: #FFFFFF;
+      cursor: pointer;
+      border: 1px solid #FFFFFF;
+      border-radius: .25em;
+      -webkit-transition: background-color 0.2s;
+      transition: background-color 0.2s;
+    }
+    .filebox label:hover {
+      font-weight: bold;
+      color: #7c7c7a;
+    }
+    .filebox label:active {
+      font-weight: bold;
+      color: #7c7c7a;
+    }
+    .filebox input[type="file"] {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+    h1 {
+    position: absolute;
+    top: 150px;
+    left: 300px;
+    font-weight: bold; /* 또는 font-weight: 700; */
+    color: #333333;
+    font-size: 50px; /* 원하는 크기로 설정 */
+    align-items: center;
+  }
+
+  #initialImage{
+  position: absolute;
+  top: 300px;
+  left: 530px;
+  }
+  #initialImage img{
+  with: 200px;
+  height: auto;
+  }
+
     </style>
   <script>
     function previewImage(input) {
@@ -53,6 +125,7 @@
       if (file) {
         var reader = new FileReader();
         reader.onload = function(e) {
+          document.getElementById('initialImage').style.display = 'none';
           document.getElementById('preview').src = e.target.result;
           document.getElementById('preview').style.display = 'block';
         }
@@ -67,54 +140,35 @@
       }
       return true; // 파일이 선택되었을 때 폼 제출 계속
     }
-    function previewImage(input) {
-    var file = input.files[0];
-    if (file) {
-      var reader = new FileReader();
-      reader.onload = function(e) {
-        // 이미지 업로드 시 jang.jpg 숨기기
-        document.getElementById('initialImage').style.display = 'none';
-        // 미리보기 이미지 표시
-        document.getElementById('preview').src = e.target.result;
-        document.getElementById('preview').style.display = 'block';
-      }
-      reader.readAsDataURL(file);
+    function showButton(input) {
+    var uploadButton = document.getElementById('upload-button');
+    if (input.files.length > 0) {
+        uploadButton.style.display = 'block'; // 파일이 선택되면 버튼을 나타나게 합니다.
+    } else {
+        uploadButton.style.display = 'none'; // 파일이 선택되지 않았을 때 버튼을 숨깁니다.
+        }
     }
-  }
   </script>
 </head>
 <body>
-<!--  <nav class="navbar navbar-expand-lg navbar-light bg-light">-->
-<!--  <nav class="navbar navbar-expand-lg" style="background-color: #FFFFFF;">-->
-<!--  <div class="container">-->
-<!--    <a class="navbar-brand" href="/" style="color: #000000; font-weight: bold;">FDC</a>-->
-<!--  </div>-->
-<!--  </nav>-->
-
-  <nav class="navbar navbar-expand-lg" style="background-color: #000000;" >
-  <div class="container">
-    <a class="navbar-brand" href="/" style="color: #FFFFFF; font-weight: bold;">FDC</a>
-  </div>
- </nav>
-
-  <div class="center-screen content-container">
-    <h1 style="font-weight: bold;">Gender & Age Classifier</h1><br>
-
+<div class="page-container">
+  <div class="center-screen">
+    <h1>Gender & Age <br> Classifier</h1>
+    <div id="initialImage">
+        <img src="{%static 'initial.jpg' %}" alt="Initial Image" style="display: none"/>
+    </div>
     <!-- 기타 내용 -->
-    <h2>Upload Image</h2><br><br>
-    <img src="{% static 'jang.jpg' %}" width="20%" height="20%" id="initialImage">
-    <img id="preview" style="display: none;" alt="Image preview" height="300"/>
-
-
-    <form method="post" enctype="multipart/form-data" onsubmit="return checkFile();">
+    <img id="preview" style="display:none;" alt="Image preview" height="300"/>
+    <br>
+<!--    <h2>Upload Image</h2><br><br>-->
+    <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        <div class="text-center mb-3"> <!-- Bootstrap의 text-center 클래스로 가운데 정렬 -->
-            <input type="file" name="image" id="fileInput" onchange="previewImage(this);" style="display: none;" />
-            <label for="fileInput" class="custom-file-upload">
-             Upload Button
-            </label>
+        <div class="filebox">
+            <label for="image" >Upload your Photo</label>
+            <input type="file" name="image" id="image" onchange="previewImage(this); showButton(this);"/>
         </div>
-        <div class="text-center"> <!-- Bootstrap의 text-center 클래스로 가운데 정렬 -->
+        <br>
+        <div class="text-center" id="upload-button" style="display: none;"> <!-- Bootstrap의 text-center 클래스로 가운데 정렬 -->
             <button type="submit" class="btn btn-primary">Predict</button>
         </div>
     </form>
@@ -125,12 +179,14 @@
     <img src="{{ uploaded_image.url }}" alt="Uploaded image" width="200">
     {% endif %}
   </div>
-  <div>
-    <img src="{%static 'ma.jpg' %}" width="20%" height="30%" style="position: absolute; top: 100px; left: 0px;">
-    <img src="{%static 'nana.jpg' %}" width="20%" height="30%" style="position: absolute; top: 55px; left: 1200px;">
-    <img src="{%static 'jungi.jpg' %}" width="20%" height="30%" style="position: absolute; top: 500px; left: 1100px;">
-    <img src="{%static 'sun2.jpg' %}" width="20%" height="30%" style="position: absolute; top: 150px; left: 1000px;">
-    <img src="{%static 'jo2.jpg' %}" width="20%" height="30%" style="position: absolute; top: 450px; left: 50px;">
+
+  <div class="image-container">
+    <img src="{%static 'yoon.jpg' %}" class="image" style="width: 180px; height: auto; position: absolute; top: 0px; left: 1450px;">
+    <img src="{%static 'seojun.jpg' %}" class="image" style="width: 280px; height: auto; position: absolute; top: 430px; left: 1320px;">
+    <img src="{%static 'soohyun.jpg' %}" class="image" style="width: 210px; height: auto; position: absolute; top: 70px; left: 1250px;">
+    <img src="{%static 'suji2.jpg' %}" class="image" style="width: 270px; height: auto; position: absolute; top: 570px; left: 210px;">
+    <img src="{%static 'sunjae2.jpg' %}" class="image" style="width: 180px; height: auto; position: absolute; top: 0px; left: 62px;">
   </div>
+</div>
 </body>
 </html>
