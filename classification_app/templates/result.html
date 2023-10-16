@@ -91,9 +91,9 @@
     <img src="{{ uploaded_image.url }}" height="300">
 <!--    <img src="{{ uploaded_image.url }}" alt="Uploaded image" height="300">-->
     {% endif %}
-    {% if results %}
+    {% if results and results|length > 0 %}
         {% for result in results %}
-<!--            <h2>Result {{ forloop.counter }}</h2>-->
+            <!-- <h2>Result {{ forloop.counter }}</h2> -->
             <br>
             <h2>당신은 아마도<br>
             {{ result.gender }} 이고 {{ result.age }} 입니다.</h2>

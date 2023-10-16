@@ -7,6 +7,7 @@ import dlib
 from torchvision import transforms
 import base64
 from torchvision import models
+import torch.nn as nn
 
 ## 전에 사용하던거
 # def load_model(model_path, model_type, output_classes):
@@ -26,8 +27,8 @@ val_transform = transforms.Compose([
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-MODEL_PATH = 'D:/Ddrive/3rd/git3/models/'
-# MODEL_PATH = 'C:/Users/tjoeun/Documents/TJE_3rd_proj-2/models/'
+# MODEL_PATH = 'D:/Ddrive/3rd/git3/models/'
+MODEL_PATH = 'C:/Users/tjoeun/Documents/TJE_3rd_proj-2/models/'
 SHAPE_PREDICTOR = 'shape_predictor_68_face_landmarks.dat'
 
 
@@ -40,7 +41,7 @@ def load_gender_model(model_path, model_type, output_classes):
     model.eval()
     return model
 
-
+# 7진분류 때 사용하는 코드
 def load_age_model(model_path, model_type):
     model = torch.hub.load('pytorch/vision:v0.10.0', model_type, pretrained=False)
     model.load_state_dict(torch.load(model_path))
@@ -49,12 +50,26 @@ def load_age_model(model_path, model_type):
     print(f"Loaded age model: {model}")  # Debugging
     return model
 
+# 6진분류때 사용하는 코드
+# def load_age_model(model_path, model_type):
+#     model = torch.hub.load('pytorch/vision:v0.10.0', model_type, pretrained=False)
+#     # 주의: 먼저 fc layer의 크기를 변경
+#     num_ftrs = model.fc.in_features
+#     model.fc = nn.Linear(num_ftrs, 6)  # 새로운 fc layer 설정
+#     # 이후에 state_dict 로드
+#     model.load_state_dict(torch.load(model_path))
+#     model = model.to(device)
+#     model.eval()
+#     print(f"Loaded age model: {model}")  # Debugging
+#     return model
 
 # Load models
 # gender_model = load_gender_model(MODEL_PATH + 'Final_1010_gender_classification_model_re_under.pth', models.resnet50, 2)
 gender_model = load_gender_model(MODEL_PATH + 'gender_classification_model.pth', models.resnet34, 2)
 
 age_model = load_age_model(MODEL_PATH + '1011_7class_resnet101.pth', 'resnet101')
+# age_model = load_age_model(MODEL_PATH + '6class_resnet101.pth', 'resnet101')
+
 
 
 def cv2_to_base64(image):
@@ -78,6 +93,8 @@ def detect_face_and_predict(image_path, gender_model, age_model):
 
     all_results = []
     age_range = {0: "10세 미만", 1: "10대", 2: "20대", 3: "30대", 4: "40대", 5: "50대", 6: "60대 이상"}
+    # age_range = {0: "10세 미만", 1: "10대", 2: "20대", 3: "30대", 4: "40대", 5: "50대"}
+
 
     for d in dets:
         shape = predictor(img_rgb, d)
@@ -116,6 +133,7 @@ def detect_face_and_predict(image_path, gender_model, age_model):
     landmarked_image_base64 = cv2_to_base64(img)
     cropped_face_image_base64 = cv2_to_base64(face_image)
 
+    print(f"Returning all_results: {all_results}")  # 디버깅용 print 문
     return all_results, landmarked_image_base64, cropped_face_image_base64
 
 def index(request):
@@ -129,6 +147,8 @@ def index(request):
 
             try:
                 prediction_results, landmarked_image_base64, cropped_face_image_base64 = detect_face_and_predict(image_path, gender_model, age_model)
+                print(f"Prediction Results in index view: {prediction_results}")  # 디버깅용 print 문
+
                 if len(prediction_results) == 0:
                     raise Exception("No faces detected.")
 
